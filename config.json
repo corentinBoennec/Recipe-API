@@ -1,7 +1,0 @@
-﻿{
-    "secret": "I'm so So so secret, you cant guess me. Even if I try hard? Yep!",
-    "dbUsername" : "cboennec", 
-    "dbPassword" : "Bouboule16",
-    "clusterAdress" : "recipecluster.gin4z.gcp.mongodb.net",
-    "dbName" : "recipeDB"
-}
