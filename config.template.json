@@ -1,0 +1,7 @@
+{
+    "secret": "",
+    "dbUsername" : "", 
+    "dbPassword" : "",
+    "clusterAdress" : "",
+    "dbName" : ""
+}

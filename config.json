@@ -1,3 +1,7 @@
 ﻿{
-    "secret": "THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET, IT CAN BE ANY STRING"
+    "secret": "I'm so So so secret, you cant guess me. Even if I try hard? Yep!",
+    "dbUsername" : "cboennec", 
+    "dbPassword" : "Bouboule16",
+    "clusterAdress" : "recipecluster.gin4z.gcp.mongodb.net",
+    "dbName" : "recipeDB"
 }

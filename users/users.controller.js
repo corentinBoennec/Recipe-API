@@ -4,6 +4,7 @@ const userService = require('./user.service');
 
 // routes
 router.post('/authenticate', authenticate);
+router.post('/register', register);
 router.get('/', getAll);
 
 module.exports = router;
@@ -18,4 +19,15 @@ function getAll(req, res, next) {
     userService.getAll()
         .then(users => res.json(users))
         .catch(next);
+}
+
+function register(req, res, next) {
+    console.log(req.body);
+    userService.register(req.body)
+        .then(user => res.json(user))
+        .catch(err => {
+            res.status(400).json({
+                error : "username already exists"
+            })
+        });
 }
