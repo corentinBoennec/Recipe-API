@@ -1,112 +1,93 @@
 ﻿const jwt = require('jsonwebtoken');
-const db = require("../models");
 const { user } = require('../models');
 const {dbUsername, dbPassword, clusterAdress, dbName, secret} = require('../config.json');
-const User = db.user;
+const db = require('_helpers/db');
+const models = require("../models");
+const bcrypt = require('bcryptjs');
+const User = db.User;
 
-// users hardcoded for simplicity, store in a db for production applications
-const users = [{ id: 1, username: 'test', password: 'test', firstName: 'Test', lastName: 'User' }];
 
 module.exports = {
     authenticate,
-    register,
-    getAll
+    getAll,
+    getById,
+    create,
+    update,
+    delete: _delete
 };
 
 async function authenticate({ username, password }) {
-    const user = users.find(u => u.username === username && u.password === password);
 
-    if (!user) throw 'Username or password is incorrect';
-
-    // create a jwt token that is valid for 7 days
-    const token = jwt.sign({ sub: user.id }, secret, { expiresIn: '7d' });
-
-    return {
-        ...omitPassword(user),
-        token
-    };
+    const user = await User.findOne({ username });
+    if (user && bcrypt.compareSync(password, user.hash)) {
+        const token = jwt.sign({ sub: user.id }, secret, { expiresIn: '7d' });
+        return {
+            ...user.toJSON(),
+            token
+        };
+    }
+    
 }
 
-async function register({ username, email, password }) {
-    /*const user = users.find(u => u.username === username && u.password === password);
-
-    if (!user) throw 'Username or password is incorrect';
-
-    // create a jwt token that is valid for 7 days
-    const token = jwt.sign({ sub: user.id }, config.secret, { expiresIn: '7d' });
-
-    return {
-        ...omitPassword(user),
-        token
-    };
-    */
-
-    /*const user = body;
-     
-    if (users.find(x => x.username === user.username)) {
-        return error(`Username  ${user.username} is already taken`);
+async function create({ username, email, password }) {
+    if (await User.findOne({ username: username })) {
+        throw 'Username "' + username + '" is already taken';
     }
- 
-    // assign user id and a few other properties then save
-    user.id = users.length ? Math.max(...users.map(x => x.id)) + 1 : 1;
-    users.push(user);
-    localStorage.setItem('users', JSON.stringify(users));
- 
-    return ok();*/
-
-    try {
-        await db.mongoose
-            .connect(
-                `mongodb+srv://${dbUsername}:${dbPassword}@${clusterAdress}/${dbName}?retryWrites=true&w=majority`, {
-                useNewUrlParser: true,
-                useUnifiedTopology: true
-            })
-            console.log("Successfully connect to MongoDB.");
-    } catch (err) {
-        console.error("error, failed connect to db", err);
+    if (await User.findOne({ email: email })) {
+        throw 'Email "' + email + '" is already taken';
     }
 
     const user = new User({
         username,
-        email,
-        password
+        email
     });
-    try{
-        return user.save();
-    }
-    catch(err){
-        throw err;
-    }
-}
 
+    // hash password
+    if (password) {
+        user.hash = bcrypt.hashSync(password, 10);
+    }
+
+    // save user
+    await user.save();
+
+}
 async function getAll() {
-    return users.map(u => omitPassword(u));
+    return await User.find({role : 'user'});//.map(u => omitPassword(u));
 }
 
-// helper functions
+const getAll2 = async() => users.map(omitPassword);
 
-function omitPassword(user) {
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+async function getById(id) {
+    console.log("id : ", id);
+    return await User.findById(id);
 }
 
-function adduser(userParam) {
-    const user = new User({
-        username: userParam['username'],
-        email: userParam.email,
-        password: userParam.password
+
+
+async function update(id, userParam) {
+    const user = await User.findById(id);
+
+    // validate
+    if (!user) throw 'User not found';
+    if (user.username !== userParam.username && await User.findOne({ username: userParam.username })) {
+        throw 'Username "' + userParam.username + '" is already taken';
     }
-    );
 
-    user.save(err => {
-        if (err) {
-            console.log("error", err);
-        }
-        else
-            console.log("added new user to user collection");
-    });
+    // hash password if it was entered
+    if (userParam.password) {
+        userParam.hash = bcrypt.hashSync(userParam.password, 10);
+    }
+
+
+    // copy userParam properties to user
+    Object.assign(user, userParam);
+
+    
+    console.log("user : ", user);
+
+    await user.save();
 }
 
-
-
-module.export = adduser
+async function _delete(id) {
+    await User.findByIdAndRemove(id);
+}
