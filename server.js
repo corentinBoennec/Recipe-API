@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const jwt = require('_helpers/jwt');
 const errorHandler = require('_helpers/error-handler');
 const users = require('./users/users.controller');
+const recipes = require('./recipes/recipes.controller');
 
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -17,6 +18,7 @@ app.use(jwt());
 
 // api routes
 app.use('/users', users);
+app.use('/recipes', recipes)
 
 // global error handler
 app.use(errorHandler);

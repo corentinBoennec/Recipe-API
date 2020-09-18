@@ -58,7 +58,6 @@ async function getAll() {
 const getAll2 = async() => users.map(omitPassword);
 
 async function getById(id) {
-    console.log("id : ", id);
     return await User.findById(id);
 }
 
