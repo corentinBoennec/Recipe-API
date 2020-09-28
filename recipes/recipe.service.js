@@ -11,23 +11,10 @@ module.exports = {
     create,
     update,
     getAll,
-    getByName
-    /*authenticate,
-    
-    getById,
-    ,
-    delete: _delete*/
+    getByName,
+    delete : _delete
 };
 
-/*name: {type: String, required : true, unique : true},
-    description: {type: String},
-    origin: {type: String, default: 'unknown'},
-    ingredients: [{ingredient: Ingredient, quantity: String}],
-    nbEaters: Number,
-    //tools: [String]
-    steps: [{text: String /*, image: /}],
-    additionalNoteFromAutor: String,
-    author: string*/
 
 async function create(recipeParams) {
 
@@ -62,10 +49,8 @@ async function create(recipeParams) {
 async function update(name, id, recipeParams) {
 
     const recipe = await getByName(name);
-    console.log("recipe returned : " , recipe);
 
     if (!recipe) throw 'Recipe not found';
-    id = "5f632e4ccce8fe1ec4122ad1";//only for testing server side. Id will be filled by the interface
     const user = await userService.getById(id);
 
     if (!user) throw 'user not found';
@@ -78,12 +63,29 @@ async function update(name, id, recipeParams) {
             recipeParams.name = newName;
         }
         Object.assign(recipe, recipeParams);
-        console.log("recipe updated" , recipe);
 
         await recipe.save();
     }
     else{
         throw "permission refused you have no right to update this recipe"
+    }
+}
+
+async function _delete(recipe_name, id_author) {
+    const recipe = await getByName(recipe_name);
+
+    if (!recipe) throw 'Recipe not found';
+    const user = await userService.getById(id);
+
+    if (!user) throw 'user not found';
+
+
+    if(user && user.name == recipe.author)
+    {
+       await Recipe.findByIdAndRemove(recipe.id);
+    }
+    else{
+        throw "permission refused you have no right to delete this recipe"
     }
 }
 

@@ -11,6 +11,8 @@ router.put('/:name', update);
 
 router.get('/', getAll);
 
+router.delete('/:name', _delete);
+
 
 //to test
 
@@ -52,6 +54,13 @@ function getAll(req, res, next) {
         .then(recipes => res.json(recipes))
         .catch(err => next(err));
 }
+
+
+function _delete(req, res, next) {
+    recipeService.delete(req.params.name, req.user.sub)
+        .then(() => res.json({}))
+        .catch(err => next(err));
+}
 /*
 function authenticate(req, res, next) {
     userService.authenticate(req.body)
@@ -77,9 +86,4 @@ function getById(req, res, next) {
 
 
 
-function _delete(req, res, next) {
-    userService.delete(req.params.id)
-        .then(() => res.json({}))
-        .catch(err => next(err));
-}
 */
